@@ -1,36 +1,44 @@
 #pragma once
 
-#define LANGUAGE_ENG 0
-#define LANGUAGE_RUS 1
 
-	std::vector <std::array<std::string,2>> answers;
+#include <ostream>
+#include <vector>
+#include <array>
+#include <string>
+#include <iostream>
 
-	int language = 0;
+#include "localization.hpp"
+
+std::vector <int> answers;
+
 	void clearConsole() {
+		
+		/* FIXME */
+		// Bad clear
 		system("CLS");
 	}
-	void drawQuestion(std::string question, int selected) {
+	void drawQuestion(const std::string& question, int selected) {
 		std::cout << question << std::endl;
 		for (size_t s = 0; s < answers.size(); s++) {
-			if (s == selected - 1) std::cout << ">" << answers[s][language] << std::endl;
+			if (s == selected - 1) std::cout << ">" << localizedString(answers[s]) << std::endl;
 
-			else std::cout << " " << answers[s][language] << std::endl;
+			else std::cout << " " << localizedString(answers[s]) << std::endl;
 			
 		}
 
 	}
 
-	void makeAnswer(std::string textEng, std::string textRus) {
-		std::array <std::string, 2> buff{ textEng,textRus };
-
-		answers.push_back(buff);
+	void makeAnswer(int code) {
+		answers.push_back(code);
 	}
 	void clearAnswers() {
 		answers.clear();
 	}
 
-	int question(std::string questionEng,std::string questionRus, int selectDynamicLanguageFlag) {
+	
+	int questionS(const std::string& questionEng,const std::string& questionRus, int selectDynamicLanguageFlag) {
 		unsigned int selectedAnswer = 1;
+		
 		switch (language) {
 			case 0:	drawQuestion(questionEng, selectedAnswer); break;
 			case 1: drawQuestion(questionRus, selectedAnswer); break;
@@ -54,7 +62,7 @@
 			
 				clearConsole();
 				switch (language) {
-					case 0:	drawQuestion(questionEng, selectedAnswer); break;
+					case 0: drawQuestion(questionEng, selectedAnswer); break;
 					case 1: drawQuestion(questionRus, selectedAnswer); break;
 				}
 
@@ -63,19 +71,19 @@
 
 		return selectedAnswer;
 	}
-	int question(std::string questionEng, std::string questionRus) {
-		return question(questionEng, questionRus, 0);
-	}
-	void selectLanguage() {
-		makeAnswer("English", "Английский");
-		makeAnswer("Russian", "Русский");
-		language = question("Select Language", "Выберите язык", 1) - 1;
+	
+	int question(int code, int selectDynamicLanguageFlag) {
+		/*FIXME*/
+		// Direct usage of localization in questionS makes unstable behavior
+		return questionS(std::string(locale[code][0]),std::string(locale[code][0]),selectDynamicLanguageFlag);
 	}
 
-	std::string localizeString(std::string eng, std::string ru) {
-		switch (language) {
-		case 0: return eng;
-		case 1: return ru;
-		}
-		return NULL;
+	int question(int code) {
+		return question(code, 0);
+	}
+
+	void selectLanguage() {
+		makeAnswer(LTEXT_ENGLISH);
+		makeAnswer(LTEXT_RUSSIAN);
+		language = question(LTEXT_SELECT_LANGUAGE, 1) - 1;
 	}
